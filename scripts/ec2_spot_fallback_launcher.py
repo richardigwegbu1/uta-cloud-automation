@@ -9,7 +9,7 @@ ec2_resource = boto3.resource('ec2')
 # Constants
 KEY_PAIR_NAME = 'uta-lab-key'
 SECURITY_GROUP_NAME = 'uta-lab-sg'
-AMI_ID = 'ami-0c55b159cbfafe1f0'  # ✅ Red Hat Enterprise Linux (RHEL) AMI ID (update if needed)
+AMI_ID = 'ami-078cb4217e3046abf'  # ✅ Red Hat Enterprise Linux (RHEL) AMI ID (update if needed)
 INSTANCE_TYPE = 't3.micro'
 TAG_NAME = 'UTA-Lab-Server'
 REGION = 'us-east-1'
@@ -99,7 +99,10 @@ def launch_on_demand():
         TagSpecifications=[
             {
                 'ResourceType': 'instance',
-                'Tags': [{'Key': 'Name', 'Value': TAG_NAME}]
+                'Tags': [
+                    {'Key': 'Name', 'Value': TAG_NAME},
+                    {'Key': 'UTA-Lab', 'Value': 'true'}  # 👈 Add this line
+                ]
             }
         ]
     )[0]
