@@ -1,0 +1,44 @@
+name: Deploy UTA Cloud Automation Scripts
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Copy Scripts to EC2 Server
+      env:
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+        KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        echo "$KEY" > key.pem
+        chmod 600 key.pem
+        scp -i key.pem -r ./scripts $USER@$HOST:/home/$USER/uta-cloud-automation/scripts
+
+    - name: Run Deployment Script on EC2
+      env:
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+        KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        ssh -i key.pem $USER@$HOST "cd /home/$USER/uta-cloud-automation/scripts && ./deploy.sh"
+
