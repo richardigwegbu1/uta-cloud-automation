@@ -53,6 +53,7 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
       run: |
+        ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST "mkdir -p /home/$USER/uta-cloud-automation/scripts/lambda_package"
         scp -i key.pem -o StrictHostKeyChecking=no ./scripts/lambda_package/lambda_function.py $USER@$HOST:/home/$USER/uta-cloud-automation/scripts/lambda_package/lambda_function.py
 
     - name: Run Deployment Script on EC2
