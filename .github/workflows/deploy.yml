@@ -36,7 +36,10 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
       run: |
-        ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST "mkdir -p /home/$USER/uta-cloud-automation/scripts/lambda_package"
+        ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST "
+          mkdir -p /home/$USER/uta-cloud-automation/scripts &&
+          mkdir -p /home/$USER/uta-cloud-automation/scripts/lambda_package
+        "
 
     - name: Copy Scripts to EC2 Server
       env:
