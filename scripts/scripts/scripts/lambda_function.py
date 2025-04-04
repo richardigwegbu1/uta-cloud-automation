@@ -1,6 +1,5 @@
 import boto3
 import datetime
-import pytz
 import os
 
 # Set idle time threshold (in minutes)
@@ -11,46 +10,48 @@ REGION = os.environ.get("AWS_REGION", "us-east-1")
 ec2 = boto3.client("ec2", region_name=REGION)
 cloudwatch = boto3.client("cloudwatch", region_name=REGION)
 
-# Function to check CPU usage and stop idle instances
 def lambda_handler(event, context):
     print("🔎 Checking for idle EC2 instances...")
 
-    # Get all running instances with a tag "Project: UTA-Lab"
+    # Filter for running EC2 instances tagged with UTA-Lab:true
     response = ec2.describe_instances(
         Filters=[
             {"Name": "instance-state-name", "Values": ["running"]},
-            {"Name": "tag:Project", "Values": ["UTA-Lab"]}
+            {"Name": "tag:UTA-Lab", "Values": ["true"]}
         ]
     )
 
-    instances = []
+    found = sum(len(res['Instances']) for res in response['Reservations'])
+    print(f"➡️ Found {found} running instance(s) with tag UTA-Lab:true")
+
     for reservation in response['Reservations']:
         for instance in reservation['Instances']:
-            instances.append(instance['InstanceId'])
+            instance_id = instance['InstanceId']
+            name = next((tag['Value'] for tag in instance.get('Tags', []) if tag['Key'] == 'Name'), instance_id)
 
-    print(f"➡️ Found {len(instances)} active lab instances.")
+            print(f"🔍 Checking instance {name} ({instance_id})...")
 
-    for instance_id in instances:
-        # Check average CPU usage in the last 60 minutes
-        end = datetime.datetime.utcnow()
-        start = end - datetime.timedelta(minutes=IDLE_THRESHOLD_MINUTES)
+            # Time range for CPU metrics
+            end = datetime.datetime.utcnow()
+            start = end - datetime.timedelta(minutes=IDLE_THRESHOLD_MINUTES)
 
-        metrics = cloudwatch.get_metric_statistics(
-            Namespace='AWS/EC2',
-            MetricName='CPUUtilization',
-            Dimensions=[{'Name': 'InstanceId', 'Value': instance_id}],
-            StartTime=start,
-            EndTime=end,
-            Period=300,
-            Statistics=['Average']
-        )
+            # Get CPU utilization
+            metrics = cloudwatch.get_metric_statistics(
+                Namespace='AWS/EC2',
+                MetricName='CPUUtilization',
+                Dimensions=[{'Name': 'InstanceId', 'Value': instance_id}],
+                StartTime=start,
+                EndTime=end,
+                Period=300,
+                Statistics=['Average']
+            )
 
-        datapoints = metrics.get("Datapoints", [])
-        avg_cpu = sum(d['Average'] for d in datapoints) / len(datapoints) if datapoints else 0
+            datapoints = metrics.get("Datapoints", [])
+            avg_cpu = sum(d['Average'] for d in datapoints) / len(datapoints) if datapoints else 0
 
-        if avg_cpu < 5:
-            print(f"⛔ Stopping idle instance {instance_id} (avg CPU: {avg_cpu:.2f}%)")
-            ec2.stop_instances(InstanceIds=[instance_id])
-        else:
-            print(f"✅ Instance {instance_id} is active (avg CPU: {avg_cpu:.2f}%)")
+            if avg_cpu < 5:
+                print(f"⛔ Stopping idle instance {name} (avg CPU: {avg_cpu:.2f}%)")
+                ec2.stop_instances(InstanceIds=[instance_id])
+            else:
+                print(f"✅ Instance {name} is active (avg CPU: {avg_cpu:.2f}%)")
 
