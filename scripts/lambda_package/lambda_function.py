@@ -10,7 +10,7 @@ ec2 = boto3.client("ec2", region_name=REGION)
 def lambda_handler(event, context):
     print("🔍 Scanning EC2 instances...")
 
-    response = ec2.describe_instances()  # ✅ No filters at all
+    response = ec2.describe_instances()  # ✅ No filters
 
     total = 0
     for reservation in response['Reservations']:
