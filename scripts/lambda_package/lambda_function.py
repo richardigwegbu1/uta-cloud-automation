@@ -3,7 +3,8 @@ import os
 import datetime
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
-print(f"🌍 Lambda running in region: {REGION}")
+#print(f"🌍 Lambda running in region: {REGION}")
+print(f"🌍 [DEBUG] Lambda running in region: {REGION}")
 
 ec2 = boto3.client("ec2", region_name=REGION)
 
