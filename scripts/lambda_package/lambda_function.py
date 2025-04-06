@@ -5,6 +5,7 @@ import datetime
 # ✅ Set region
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 print(f"🌍 [DEBUG] Lambda running in region: {REGION}")
+print("[DEBUG] Triggering full CI/CD test")
 
 # ✅ Set idle time threshold (default = 10 minutes)
 IDLE_THRESHOLD_MINUTES = int(os.environ.get("IDLE_THRESHOLD_MINUTES", 10))
