@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     response = ec2.describe_instances(
         Filters=[
             {"Name": "instance-state-name", "Values": ["running"]},
-            {"Name": "tag:Project", "Values": ["UTA-Lab"]}
+            {"Name": "tag:UTA-Lab", "Values": ["true"]}
         ]
     )
 

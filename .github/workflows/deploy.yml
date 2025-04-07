@@ -25,6 +25,13 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Save EC2 SSH Key  # <-- This goes here
+      env:
+        KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        echo "$KEY" > key.pem
+        chmod 600 key.pem
+
     - name: Save EC2 SSH Key
       env:
         KEY: ${{ secrets.EC2_KEY }}

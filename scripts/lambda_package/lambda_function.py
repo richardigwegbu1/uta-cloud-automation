@@ -3,6 +3,7 @@ import os
 import datetime
 
 # ✅ Region and Threshold
+# ✅ Region and Threshold
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 IDLE_THRESHOLD_MINUTES = int(os.environ.get("IDLE_THRESHOLD_MINUTES", 10))
 print(f"🌍 [DEBUG] Lambda running in region: {REGION}")
