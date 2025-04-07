@@ -64,3 +64,12 @@ jobs:
       run: |
         ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST "cd /home/$USER/uta-cloud-automation/scripts && ./deploy.sh"
 
+    - name: Deploy Lambda Function
+      run: |
+        cd scripts/lambda_package
+        zip -r function.zip .
+        aws lambda update-function-code \
+          --function-name StopIdleInstancesUTA \
+          --zip-file fileb://function.zip \
+          --region us-east-1
+
