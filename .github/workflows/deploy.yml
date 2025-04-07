@@ -64,6 +64,15 @@ jobs:
       run: |
         ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST "cd /home/$USER/uta-cloud-automation/scripts && ./deploy.sh"
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1    
+
+
+
     - name: Deploy Lambda Function
       run: |
         cd scripts/lambda_package
